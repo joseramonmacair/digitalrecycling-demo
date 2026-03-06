@@ -1,0 +1,37 @@
+# Digital Recycling — Price Intelligence
+## Stack de dependencias
+
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+playwright>=1.43.0
+httpx>=0.27.0
+beautifulsoup4>=4.12.0
+lxml>=5.2.0
+pydantic>=2.6.0
+
+# ─── Setup ───────────────────────────────────────────
+# 1. Instalar dependencias
+#    pip install -r requirements.txt
+#
+# 2. Instalar navegadores Playwright
+#    playwright install chromium
+#
+# 3. Arrancar API
+#    uvicorn api:app --reload --port 8000
+#
+# 4. Probar endpoint
+#    GET http://localhost:8000/search?oem=036100098AX
+#    GET http://localhost:8000/search?oem=1J0199167K&sources=ovoko,bparts
+#
+# ─── Notas ───────────────────────────────────────────
+# - Los scrapers con Playwright (bparts, recambioverde) necesitan
+#   que Chromium esté instalado vía: playwright install chromium
+#
+# - Los scrapers con httpx (ovoko, ecooparts, opisto) son más ligeros
+#   y no requieren navegador
+#
+# - Para producción se recomienda añadir proxies rotativos en los
+#   scrapers con Playwright para evitar bloqueos
+#
+# - El dashboard React se conecta a este backend en localhost:8000
+#   (cambiar BASE_URL en el componente para producción)
