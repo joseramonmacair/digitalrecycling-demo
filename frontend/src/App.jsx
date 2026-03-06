@@ -209,9 +209,35 @@ export default function App() {
     setResults([]);
     setSearchedOem(ref);
     setActiveTab("results");
-    await new Promise(r => setTimeout(r, 1800 + Math.random() * 800));
-    const data = generateMockResults(ref);
-    setResults(data);
+    //await new Promise(r => setTimeout(r, 1800 + Math.random() * 800));
+    //const data = generateMockResults(ref);
+    //setResults(data);
+    	const res = await fetch(`https://digitalrecycling-api.onrender.com/search?oem=${ref}`);
+	const json = await res.json();
+
+	// Transformar respuesta del backend al formato del dashboard
+	const data = json.sources.map(source => {
+	  if (!source.available) return { source: source.source, available: false };
+	  return {
+	    source: source.source,
+	    available: true,
+	    partName: source.listings[0]?.part_name || "",
+	    category: source.listings[0]?.category || "Recambio",
+	    oem: ref,
+	    price_min: source.price_min,
+	    price_avg: source.price_avg,
+	    price_max: source.price_max,
+	    listings: source.count,
+	    condition: source.listings[0]?.condition || "Usado",
+	    warranty: source.listings[0]?.warranty || "Sin garantía",
+	    url: source.listings[0]?.url || "#",
+	  };
+	});
+	setResults(data);
+	
+
+
+
     setHistory(prev => {
       const entry = {
         oem: ref,
