@@ -1,12 +1,12 @@
 """
 Scraper Ovoko - ovoko.es
-Protegido por Cloudflare → usa curl_cffi para impersonar Chrome TLS fingerprint
+Protegido por Cloudflare - usa curl_cffi para impersonar Chrome TLS fingerprint
 URL:   https://ovoko.es/buscar?q=QUERY
 Card:  div.products__items
 Title: span.products__text__header
 """
 Scraper Ovoko - ovoko.es
-Protegido por Cloudflare → usa ScraperAPI con proxies residenciales
+Protegido por Cloudflare - usa ScraperAPI con proxies residenciales
 URL:   https://ovoko.es/buscar?q=QUERY
 Card:  div.products__items
 Title: span.products__text__header
@@ -31,7 +31,7 @@ class OvokoScraper(BaseScraper):
                     if not SCRAPER_API_KEY:
                                 return ScraperResult(source=self.na"""
 Scraper Ovoko - ovoko.es
-Protegido por Cloudflare → usa ScraperAPI con proxies residenciales
+Protegido por Cloudflare - usa ScraperAPI con proxies residenciales
 URL:   https://ovoko.es/buscar?q=QUERY
 Card:  div.products__items
 Title: span.products__text__header
@@ -131,7 +131,7 @@ class OvokoScraper:
 
         for card in soup.select("div.products__items")[:10]:
             title_el = card.select_one("span.products__text__header")
-            title = title_el.get_text(strip=True) if title_el else "Sin título"
+            title = title_el.get_text(strip=True) if title_el else "Sin t-tulo"
 
             # Vehicle description (2nd item)
             desc_items = card.select("span.products__text__description__item")
