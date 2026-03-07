@@ -1,10 +1,8 @@
 """
 Scraper RecambioVerde — selectores verificados en vivo
 URL: https://www.recambioverde.es/recambios-desguace/QUERY
-Card: div.product-item-container.item--static (contiene imagen + right-block)
-Título: a[href*="/detalle/"] con texto del nombre
-Precio: span.price-new (dentro de .right-block > .price)
-Link: a[href*="/detalle/"]
+Card: a[href*='/detalle/'] con texto (no imagen)
+Precio: span.price-new (subiendo por el DOM desde el link)
 """
 from .base import BaseScraper, PartListing, ScraperResult, parse_price
 from bs4 import BeautifulSoup
@@ -17,8 +15,8 @@ class RecambioVerdeScraper(BaseScraper):
     base_url = "https://www.recambioverde.es"
 
     def build_url(self, query: str) -> str:
-        # RecambioVerde usa slug en la URL
-        slug = quote_plus(query.lower().replace(" ", "-"))
+        # RecambioVerde usa el texto directamente en la URL sin encoding especial
+        slug = query.lower().replace(" ", "-")
         return f"{self.base_url}/recambios-desguace/{slug}"
 
     async def scrape(self, query: str) -> ScraperResult:
@@ -30,28 +28,25 @@ class RecambioVerdeScraper(BaseScraper):
         soup = BeautifulSoup(html, "lxml")
         listings: List[PartListing] = []
 
-        # Buscar todos los links de detalle — cada pieza tiene 2 links (img + texto)
         seen_urls = set()
-        for link_el in soup.select("a[href*='/detalle/']")[:20]:
-            link = link_el["href"]
-            if link in seen_urls:
+
+        for link_el in soup.select("a[href*='/detalle/']"):
+            href = link_el.get("href", "")
+            if not href or href in seen_urls:
                 continue
-            seen_urls.add(link)
 
-            # El link de texto tiene el nombre de la pieza
+            # Solo links de texto (con nombre de pieza), no links de imagen
             title_text = link_el.get_text(strip=True)
-            if not title_text or len(title_text) < 5:
-                continue  # saltar links de imagen
+            if not title_text or len(title_text) < 8:
+                continue
 
-            if link.startswith("/"):
-                link = self.base_url + link
+            seen_urls.add(href)
+            full_url = self.base_url + href if href.startswith("/") else href
 
-            # Buscar el precio en el contenedor padre
-            card = link_el.closest("div") if hasattr(link_el, "closest") else None
-            # En BS4 subimos manualmente
-            el = link_el.parent
+            # Buscar precio subiendo por el DOM
             price_raw = ""
-            for _ in range(6):
+            el = link_el.parent
+            for _ in range(8):
                 if el is None:
                     break
                 price_el = el.select_one("span.price-new")
@@ -63,17 +58,20 @@ class RecambioVerdeScraper(BaseScraper):
             price = parse_price(price_raw)
 
             # Imagen
-            img_el = link_el.find_previous("img") or link_el.find("img")
-            image = None
+            img_el = link_el.find_previous_sibling("a")
+            img = None
             if img_el:
-                image = img_el.get("src") or img_el.get("data-src")
+                img_tag = img_el.find("img")
+                if img_tag:
+                    img = img_tag.get("src") or img_tag.get("data-src")
 
             listings.append(PartListing(
                 title=title_text, price=price, price_raw=price_raw,
-                url=link, source=self.name, image_url=image,
+                url=full_url, source=self.name, image_url=img,
             ))
 
             if len(listings) >= 10:
                 break
 
         return ScraperResult(source=self.name, listings=listings)
+

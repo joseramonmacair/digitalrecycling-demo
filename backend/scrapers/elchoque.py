@@ -1,7 +1,7 @@
 """
 Scraper El Choque — selectores verificados en vivo
 URL: https://www.elchoque.com/?mot_q=QUERY
-Card: article.js-product-miniature
+Resultados reales: article.js-product-miniature que NO están dentro de .swiper-wrapper
 Título: .s_title_block a
 Precio: span.price
 """
@@ -27,7 +27,13 @@ class ElChoqueScraper(BaseScraper):
         soup = BeautifulSoup(html, "lxml")
         listings: List[PartListing] = []
 
-        for card in soup.select("article.js-product-miniature")[:10]:
+        # Excluir cards dentro del carrusel (swiper) — son productos destacados, no resultados
+        # Los resultados reales están fuera del swiper, en el bloque de búsqueda
+        for card in soup.select("article.js-product-miniature"):
+            # Saltar si está dentro de un swiper (carrusel de la home)
+            if card.find_parent(class_="swiper-wrapper"):
+                continue
+
             title_el = card.select_one(".s_title_block a") or card.select_one("h2 a, h3 a, a")
             title = title_el.get_text(strip=True) if title_el else "Sin título"
 
@@ -50,4 +56,8 @@ class ElChoqueScraper(BaseScraper):
                 url=link, source=self.name, image_url=image,
             ))
 
+            if len(listings) >= 10:
+                break
+
         return ScraperResult(source=self.name, listings=listings)
+
