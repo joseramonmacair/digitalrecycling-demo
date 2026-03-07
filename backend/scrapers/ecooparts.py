@@ -23,7 +23,11 @@ class EcoopartsScraper(BaseScraper):
             f"&tolreg=MA==&veid=MA==&paid=NjA=&qregx=MzA=&tmin=MQ=="
             f"&idla=ZXNfRVM=&fila=ZXNfRVM=&oem=&vin=&ma=0&md=0&ca=0&ar=0"
         )
-        return f"{self.base_url}/ajax/ajax_buscador.php?{params}"
+        target = f"{self.base_url}/ajax/ajax_buscador.php?{params}"
+        if SCRAPER_API_KEY:
+            from urllib.parse import quote as _q
+            return f"https://api.scraperapi.com/?api_key={SCRAPER_API_KEY}&url={_q(target)}&render=false"
+        return target
 
     async def scrape(self, query: str) -> ScraperResult:
         url = self.build_url(query)
