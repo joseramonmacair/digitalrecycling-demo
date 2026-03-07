@@ -39,7 +39,7 @@ class OvokoScraper(BaseScraper):
             price = parse_price(price_raw)
 
             link_el = card.select_one("a.products__items__link")
-            link = link_el["href"] if link_el else self.base_url
+            link = link_el.get("href", self.base_url) if link_el else self.base_url
             if link.startswith("/"):
                 link = self.base_url + link
 
