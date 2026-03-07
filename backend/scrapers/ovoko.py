@@ -16,7 +16,7 @@ class OvokoScraper(BaseScraper):
             return ScraperResult(source=self.name, listings=[], error="SCRAPER_API_KEY not configured")
 
         target_url = f"{self.base_url}/buscar?q={quote_plus(query)}"
-        api_url = f"https://api.scraperapi.com/?api_key={SCRAPER_API_KEY}&url={quote_plus(target_url)}&render=true"
+        api_url = f"https://api.scraperapi.com/?api_key={SCRAPER_API_KEY}&url={quote_plus(target_url)}&render=true&wait_for_css=div.products__items"
 
         html, error = await self.fetch(api_url)
         if not html:
